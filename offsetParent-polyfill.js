@@ -60,7 +60,6 @@
     return null;
   }
 
-  // TODO find out if these are being leaked to the global object
   let isOffsetParentPatchedCached = null;
   function isOffsetParentPatched() {
     if (isOffsetParentPatchedCached !== null) {
@@ -95,18 +94,15 @@
   }
 
   function offsetTopLeftPolyfill(element, originalFn) {
-    // TODO check for new vs old behavior here and cache the result.
-    // assuming new behavior.
+    if (!isOffsetParentPatched())
+      return originalFn.apply(element);
+
     let value = originalFn.apply(element);
     let nextOffsetParent = offsetParentPolyfill(element, /*isNewBehavior=*/false);
     const scopes = ancestorTreeScopes(element);
 
     while (!scopes.has(nextOffsetParent.getRootNode())) {
-      if (isOffsetParentPatched()) {
-        value -= originalFn.apply(nextOffsetParent);
-      } else {
-        value += originalFn.apply(nextOffsetParent);
-      }
+      value -= originalFn.apply(nextOffsetParent);
       nextOffsetParent = offsetParentPolyfill(nextOffsetParent, /*isNewBehavior=*/false);
     }
 

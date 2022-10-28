@@ -1,7 +1,13 @@
 <!DOCTYPE html>
+<script>
+const originalOffsetParent = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetParent').get;
+const originalOffsetTop = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetTop').get;
+const originalOffsetLeft = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetLeft').get;
+window.originalOffsetParentForTesting = element => originalOffsetParent.apply(element);
+window.originalOffsetTopForTesting = element => originalOffsetTop.apply(element);
+window.originalOffsetLeftForTesting = element => originalOffsetLeft.apply(element);
+</script>
 <script src="offsetParent-polyfill.js"></script>
-
-<div id=output></div>
 
 <style>
 .box {
@@ -19,7 +25,7 @@
     }
     </style>
     <div class=box></div>
-    <div style="position: relative">
+    <div id=target1shadow style="position: relative">
       <div class=box></div>
       <slot></slot>
     </div>
@@ -37,7 +43,7 @@
     }
     </style>
     <span class=box></span>
-    <span style="position: relative">
+    <span id=target2shadow style="position: relative">
       <span class=box></span>
       <slot></slot>
     </span>
@@ -55,7 +61,7 @@
     }
     </style>
     <div class=box></div>
-    <div style="position: relative">
+    <div id=target3shadowouter style="position: relative">
       <div class=box></div>
       <div>
         <template shadowroot=open>
@@ -66,7 +72,7 @@
           }
           </style>
           <div class=box></div>
-          <div style="position: relative">
+          <div id=target3shadowinner style="position: relative">
             <div class=box></div>
             <slot></slot>
           </div>
@@ -78,6 +84,8 @@
   <div class=box></div>
   <div id=target3 style="position: absolute" class=box></div>
 </div>
+
+<div id=output></div>
 
 <script>
 (function attachShadowRoots(root) {
@@ -96,7 +104,17 @@ function log(str) {
   output.insertAdjacentHTML('beforeend', `<div>${str}</div>`);
 }
 
-log(`target1.offsetTop: ${target1.offsetTop}`);
-log(`target2.offsetTop: ${target2.offsetTop}`);
-log(`target3.offsetTop: ${target3.offsetTop}`);
+log(`target1 polyfill: ${target1.offsetTop}`);
+log(`target2 polyfill: ${target2.offsetTop}`);
+log(`target3 polyfill: ${target3.offsetTop}`);
+log('target1 native: ' + originalOffsetTopForTesting(target1));
+log('target2 native: ' + originalOffsetTopForTesting(target2));
+log('target3 native: ' + originalOffsetTopForTesting(target3));
+
+log(`target1 offsetParent polyfill: ${target1.offsetParent.tagName} ${target1.offsetParent.id}`);
+log(`target2 offsetParent polyfill: ${target2.offsetParent.tagName} ${target2.offsetParent.id}`);
+log(`target3 offsetParent polyfill: ${target3.offsetParent.tagName} ${target3.offsetParent.id}`);
+log(`target1 offsetParent native: ${originalOffsetParentForTesting(target1).tagName} ${originalOffsetParentForTesting(target1).id}`);
+log(`target2 offsetParent native: ${originalOffsetParentForTesting(target2).tagName} ${originalOffsetParentForTesting(target2).id}`);
+log(`target3 offsetParent native: ${originalOffsetParentForTesting(target3).tagName} ${originalOffsetParentForTesting(target3).id}`);
 </script>

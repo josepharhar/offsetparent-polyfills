@@ -10,15 +10,14 @@ function flatTreeParent(element) {
 
 function ancestorTreeScopes(element) {
   const scopes = new Set();
-  if (isNewBehavior) {
-    let currentScope = element.getRootNode();
-    while (currentScope) {
-      scopes.add(currentScope);
-      currentScope = currentScope.parentNode
-        ? currentScope.parentNode.getRootNode()
-        : null;
-    }
+  let currentScope = element.getRootNode();
+  while (currentScope) {
+    scopes.add(currentScope);
+    currentScope = currentScope.parentNode
+      ? currentScope.parentNode.getRootNode()
+      : null;
   }
+  return scopes;
 }
 
 function offsetParentPolyfill(element, isNewBehavior) {

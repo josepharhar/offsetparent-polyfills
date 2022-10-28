@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<script src="offsetParent-polyfill.js"></script>
+
+<div id=output></div>
+
+<style>
+.box {
+  width: 10px;
+  height: 10px;
+}
+</style>
+
+<div>
+  <template shadowroot=open>
+    <style>
+    .box {
+      width: 10px;
+      height: 10px;
+    }
+    </style>
+    <div class=box></div>
+    <div style="position: relative">
+      <div class=box></div>
+      <slot></slot>
+    </div>
+  </template>
+  <div class=box></div>
+  <div id=target1 style="position: absolute" class=box></div>
+</div>
+
+<span>
+  <template shadowroot=open>
+    <style>
+    .box {
+      width: 10px;
+      height: 10px;
+    }
+    </style>
+    <span class=box></span>
+    <span style="position: relative">
+      <span class=box></span>
+      <slot></slot>
+    </span>
+  </template>
+  <span class=box></span>
+  <span id=target2 style="position: absolute" class=box></span>
+</span>
+
+<div>
+  <template shadowroot=open>
+    <style>
+    .box {
+      width: 10px;
+      height: 10px;
+    }
+    </style>
+    <div class=box></div>
+    <div style="position: relative">
+      <div class=box></div>
+      <div>
+        <template shadowroot=open>
+          <style>
+          .box {
+            width: 10px;
+            height: 10px;
+          }
+          </style>
+          <div class=box></div>
+          <div style="position: relative">
+            <div class=box></div>
+            <slot></slot>
+          </div>
+        </template>
+        <slot></slot>
+      </div>
+    </div>
+  </template>
+  <div class=box></div>
+  <div id=target3 style="position: absolute" class=box></div>
+</div>
+
+<script>
+(function attachShadowRoots(root) {
+  root.querySelectorAll("template[shadowroot]").forEach(template => {
+    const mode = template.getAttribute("shadowroot");
+    const shadowRoot = template.parentNode.attachShadow({ mode });
+    shadowRoot.appendChild(template.content);
+    template.remove();
+    attachShadowRoots(shadowRoot);
+  });
+})(document);
+</script>
+
+<script>
+function log(str) {
+  output.insertAdjacentHTML('beforeend', `<div>${str}</div>`);
+}
+
+log(`target1.offsetTop: ${target1.offsetTop}`);
+log(`target2.offsetTop: ${target2.offsetTop}`);
+log(`target3.offsetTop: ${target3.offsetTop}`);
+</script>
